@@ -43,15 +43,31 @@ There is manual setup documentation [here](https://docs.microsoft.com/en-us/azur
 
 	![](images/add-vm-log-analytics.png)
 
-6. Deploy the Inventory and Change Management solution to the Virtual Machine
+6. Add the Hybrid Runbook Worker Role to the Virtual Machine through the Monitoring Agent. This also creates a Hybrid Worker Group. ([instructions here](https://docs.microsoft.com/en-us/azure/automation/automation-windows-hrw-install#step-4---install-the-runbook-environment-and-connect-to-azure-automation))
 
-	- Select the virtual machine from the list of machines being tracked by the Log Analytics Workspace or choose to add all available machines.
+	Install the PowerShell module to add the worker role. This module is automatically copied to the machine when the Log Analaytics Agent is pushed down. Run this in an Administrator PowerShell session
+	```
+	cd "C:\Program Files\Microsoft Monitoring Agent\Agent\AzureAutomation\<version>\HybridRegistration"
+	Import-Module .\HybridRegistration.psd1
+	```
 
-	![](images/add-vm-to-inventory.png)
+	```
+	Add-HybridRunbookWorker –GroupName <String> -EndPoint <Url> -Token <String>
+	```
+	
+	EndPoint and Token information can be pulled from the Automation Account -> Account Settings -> Keys blade.
 
-7. Add Virtual Machine to Hybrid Worker Group in Automation Account
-8. **more to come**
+	![](/images/automation-keys-url.png)
 
+7. When executing a runbook select the Hybrid Worker.
+
+	```
+	Start-AzureRmAutomationRunbook –AutomationAccountName <AccountName> –Name <RunbookName> -RunOn <HybridWorkerGroupName>
+	```
+
+	- Test executions can be run on the Hybrid Worker as well by selecting the Hybrid Worker slider and choosing the Hybrid Workgroup Group.
+
+	![](images/test-runbook.png)
 
 ## Authentication
 - Choose [Managed Service Identity](https://docs.microsoft.com/en-us/azure/automation/automation-hrw-run-runbooks#runbook-auth-managed-identities) or [Run As account with certificate](https://docs.microsoft.com/en-us/azure/automation/automation-hrw-run-runbooks#use-runbook-authentication-with-run-as-account)
