@@ -50,6 +50,7 @@ There is manual setup documentation [here](https://docs.microsoft.com/en-us/azur
 	cd "C:\Program Files\Microsoft Monitoring Agent\Agent\AzureAutomation\<version>\HybridRegistration"
 	Import-Module .\HybridRegistration.psd1
 	```
+	Then add the VM to a Hybrid Worker Group
 
 	```
 	Add-HybridRunbookWorker –GroupName <String> -EndPoint <Url> -Token <String>
@@ -59,13 +60,13 @@ There is manual setup documentation [here](https://docs.microsoft.com/en-us/azur
 
 	![](/images/automation-keys-url.png)
 
-7. When executing a runbook select the Hybrid Worker.
+7. The command below will execute the runbook on the provided hybrid worker group
 
 	```
 	Start-AzureRmAutomationRunbook –AutomationAccountName <AccountName> –Name <RunbookName> -RunOn <HybridWorkerGroupName>
 	```
 
-	- Test executions can be run on the Hybrid Worker as well by selecting the Hybrid Worker slider and choosing the Hybrid Workgroup Group.
+	- Test executions can also be run on the Hybrid Worker as well by selecting the Hybrid Worker slider and choosing the Hybrid Workgroup Group.
 
 	![](images/test-runbook.png)
 
@@ -78,3 +79,14 @@ I had an issue on Windows Server 2016 with PowerShell cmdlets not installing cor
 ```
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 ```
+
+## Extending the Pattern
+
+An example pattern to fully automate the key rotation might look like this:
+
+1. Key Vault expiry event is sent to Event Grid
+2. Event Grid kicks off an Azure Automation runbook(s)
+3. A new Secret is generated and stored in Key Vault
+4. Updated passwords are sent to SQL DB and SSRS
+
+![](images/expanded-solution.png)
